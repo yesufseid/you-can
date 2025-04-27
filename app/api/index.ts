@@ -26,24 +26,7 @@ const getCategory=async()=>{
   return data;
 };
 
-const uploadImage = async (file: File) => {
-  const supabase = await createClient();
-  const filePath = `youcan-${Date.now()}-${file.name}`;
-  const { error } = await supabase.storage
-    .from('youcan') // Your bucket name
-    .upload(filePath, file);
-
-  if (error) {
-    console.error('Upload error:', error.message);
-    return null;
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('you')
-    .getPublicUrl(filePath);
-
-  return publicUrlData.publicUrl;
-};
 
 
-export {createCategory,getCategory,uploadImage}
+
+export {createCategory,getCategory}

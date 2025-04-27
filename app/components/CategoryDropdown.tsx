@@ -20,12 +20,20 @@ import Image from "next/image";
 const MenuWrapper = styled("div")(({ theme }) => ({
   padding: theme.spacing(1),
 }));
-
+type activityProps={
+  id:string
+  name:string,
+  mass:number,
+  image:string ,
+  created_at:string
+}
 
 const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
   const dispatch = useDispatch<AppDispatch>();
   const { category,filterd } = useSelector((state: RootState) => state.category);
   const [filterText, setFilterText] = useState("");
+  const [filtered, setFilteredText] = useState<any[]>([]);
+
   const theme:any= useTheme();
   const isDark = theme.theme === "dark";
 
@@ -33,13 +41,17 @@ const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
     dispatch({ type: "category/fetchCategory" });
   }, [dispatch]);
 
-  const filtered = useMemo(
-    () =>
-      category.filter((cat) =>
-        cat.name.toLowerCase().includes(filterText.toLowerCase())
-      ),
-    [category, filterText]
-  );
+  const HandleFilterText=(e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>{
+    const text=e.target.value
+    setFilterText(text)
+    if(filterText==="") setFilteredText(category)    
+
+    const data:any=category.filter((cat) =>
+          cat.name.toLowerCase().includes(text.toLowerCase())
+        )
+    setFilteredText(data)    
+  }
+
   const handleToggle = (name: string) => {
     const data=category.filter((cat)=>cat.name===name)
     dispatch({ type:"category/filter", payload:data[0]});
@@ -75,7 +87,7 @@ const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
           fullWidth
           value={filterText}
           placeholder="Filter by name..."
-          onChange={(e) => setFilterText(e.target.value)}
+          onChange={(e) =>HandleFilterText(e)}
           size="small"
           sx={{
             input: {
@@ -89,7 +101,7 @@ const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
         />
       </MenuWrapper>
 
-      {filtered.map((cat, index) => (
+      {filtered.map((cat:activityProps,index) => (
         <MenuItem key={index} value={cat.name} onClick={() => handleToggle(cat.name)}>
           <Checkbox checked={filterd.includes(cat)} />
            {cat.image ? (

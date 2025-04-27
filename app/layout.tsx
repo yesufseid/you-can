@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Providers } from "./Redux/Provider";
 import "./globals.css";
 import Headre from "./components/Header";
+import AddCat from "./components/AddCat";
 
 
 const defaultUrl = process.env.VERCEL_URL
@@ -40,6 +41,7 @@ export default function RootLayout({
               <main>
                   <Headre />
                 {children}
+                <AddCat />
           </main>
           </Providers>
         </ThemeProvider>

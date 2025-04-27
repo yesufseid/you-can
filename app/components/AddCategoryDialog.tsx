@@ -8,62 +8,88 @@ import {
   DialogTitle,
   TextField,
   Typography,
+  IconButton,
 } from '@mui/material';
-import React, { useRef } from 'react';
-import { createClient } from '../../utils/supabase/client'; // adjust the import path
+import UploadIcon from '@mui/icons-material/Upload';
+import React, { useRef, useState } from 'react';
+import { useTheme } from 'next-themes'; 
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "../Redux/store";
+import { createClient } from '@/utils/supabase/client';
+
 
 interface Category {
   name: string;
   mass: number;
-  image: string[];
+  image: string; // only local preview now
 }
 
 interface AddCategoryDialogProps {
   open: boolean;
-  onClose: () => void;
-  onCreate: (category: Category) => void;
-  newCategory: Category;
-  setNewCategory: (category: Category) => void;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({
-  open,
-  onClose,
-  onCreate,
-  newCategory,
-  setNewCategory,
-}) => {
+const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, setOpen }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [newCategory, setNewCategory] = useState<Category>({
+    name:'',
+    mass: 0,
+    image:'',
+  });
+  const [file, setFile] = useState<File | null>(null);
+  const theme: any = useTheme();
+  const isDark = theme.theme === 'dark';
+ const dispatch = useDispatch<AppDispatch>();
+ const {loading} = useSelector((state: RootState) => state.category);
+  const handleImageChange = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const selectedFile = files[0];
+    setFile(selectedFile);
 
-  const handleImageUpload = async (files: FileList | null) => {
-    if (!files) return;
-
-    const uploadedUrls: string[] = [];
-
-    for (const file of Array.from(files)) {
-      const filePath = `${Date.now()}-${file.name}`;
-      const { error } = await createClient.storage
-        .from('category-images')
-        .upload(filePath, file);
-
-      if (!error) {
-        const { data } = createClient.storage
-          .from('category-images')
-          .getPublicUrl(filePath);
-        uploadedUrls.push(data.publicUrl);
-      } else {
-        console.error('Image upload failed:', error.message);
-      }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewCategory((prev) => ({
+        ...prev,
+        image: reader.result as string, // local preview
+      }));
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+  const uploadImage = async (file: File) => {
+    const supabase = await createClient();
+    const filePath = `youcan-${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage
+      .from('youcan') // Your bucket name
+      .upload(filePath, file);
+  
+    if (error) {
+      console.error('Upload error:', error.message);
+      return null;
     }
-
-    setNewCategory({
-      ...newCategory,
-      image: [...newCategory.image, ...uploadedUrls],
-    });
+  
+    const { data: publicUrlData } = supabase.storage
+      .from('you')
+      .getPublicUrl(filePath);
+  
+    return publicUrlData.publicUrl;
+  };
+  const handleCreate = async () => {
+    if (!file) return;
+     const publicUrl=await uploadImage(file)
+    if (publicUrl) {
+      const categoryToSave = {
+        ...newCategory,
+        image:publicUrl,
+      };
+      dispatch({ type:"category/create", payload:categoryToSave});   
+      setOpen(false);
+    } else {
+      console.error('Image upload failed:');
+    }
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={() => setOpen(false)}>
       <DialogTitle>Add New Category</DialogTitle>
       <DialogContent>
         <TextField
@@ -72,7 +98,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({
           label="Category Name"
           value={newCategory.name}
           onChange={(e) =>
-            setNewCategory({ ...newCategory, name: e.target.value })
+            setNewCategory((prev) => ({ ...prev, name: e.target.value }))
           }
         />
         <TextField
@@ -82,54 +108,64 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({
           type="number"
           value={newCategory.mass}
           onChange={(e) =>
-            setNewCategory({
-              ...newCategory,
-              mass: parseFloat(e.target.value) || 0,
-            })
+            setNewCategory((prev) => ({ ...prev, mass: Number(e.target.value) }))
           }
         />
 
-        <Button
-          fullWidth
-          variant="outlined"
-          component="label"
-          sx={{ mt: 2 }}
-        >
-          Upload Images
-          <input
-            hidden
-            multiple
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            onChange={(e) => handleImageUpload(e.target.files)}
-          />
-        </Button>
+        {/* Upload Icon Button */}
+        <div className="flex justify-center mt-4">
+          <IconButton
+            component="label"
+            sx={{
+              bgcolor: isDark ? 'grey.800' : 'grey.200',
+              '&:hover': { bgcolor: isDark ? 'grey.700' : 'grey.300' },
+              width: 60,
+              height: 60,
+            }}
+          >
+            <UploadIcon fontSize="large" />
+            <input
+              hidden
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={(e) => handleImageChange(e.target.files)}
+            />
+          </IconButton>
+        </div>
 
-        {newCategory.image.length > 0 && (
+        {/* Preview Uploaded Image */}
+        {newCategory.image && (
           <>
             <Typography variant="body2" sx={{ mt: 2 }}>
-              Uploaded Images:
+              Preview Image:
             </Typography>
-            {newCategory.image.map((imgUrl, i) => (
+            <div className="flex justify-center mt-2">
               <img
-                key={i}
-                src={imgUrl}
-                alt={`uploaded-${i}`}
-                style={{ width: 80, height: 80, objectFit: 'cover', margin: 4 }}
+                src={newCategory.image}
+                alt="preview"
+                style={{
+                  width: 120,
+                  height: 120,
+                  objectFit: 'cover',
+                  borderRadius: 8,
+                  border: `2px solid ${isDark ? '#555' : '#ccc'}`,
+                }}
               />
-            ))}
+            </div>
           </>
         )}
       </DialogContent>
+
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={() => setOpen(false)}>Cancel</Button>
         <Button
-          onClick={() => onCreate(newCategory)}
+          onClick={handleCreate}
           variant="contained"
           color="primary"
+          disabled={!newCategory.name || !newCategory.mass || !file}
         >
-          Create
+         {loading?"loading...":"Create"}
         </Button>
       </DialogActions>
     </Dialog>
