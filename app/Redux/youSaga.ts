@@ -1,6 +1,6 @@
 
 import { call, put, takeEvery } from "redux-saga/effects";
-import {setCategory,setLoading,setError,addCategory,addFilterd} from "./youSlice"
+import {setCategory,setLoading,setError,addCategory,addFilterd,addCount} from "./youSlice"
 import { getCategory,createCategory} from "../api/index";
 
 
@@ -43,12 +43,18 @@ function* filter(action:any): Generator<any, void, any>{
     console.error("Failed to fetch category:", error);
   }
 }
+function* AddCount(action:any): Generator<any, void, any>{
+  try {
+      yield put(addCount(action.payload))
+  } catch (error) {
+    console.error("Failed to fetch category:", error);
+  }
+}
 
 
 export default function* youSaga() {
   yield takeEvery("category/fetchCategory",fetchCategory);
   yield takeEvery("category/create",create);
   yield takeEvery("category/filter",filter);
-
-
+  yield takeEvery("category/AddCount",AddCount);
 }

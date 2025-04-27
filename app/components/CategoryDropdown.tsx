@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  Avatar,
   Checkbox,
-  ListItemAvatar,
   ListItemText,
   MenuItem,
   OutlinedInput,
@@ -14,13 +12,10 @@ import { styled } from "@mui/system";
 import React, { useEffect, useState,useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../Redux/store";
+import { useTheme } from "next-themes";
+import Image from "next/image";
 
-interface Category {
-  name: string;
-  volume: number;
-  density: number;
-  image?: string;
-}
+
 
 const MenuWrapper = styled("div")(({ theme }) => ({
   padding: theme.spacing(1),
@@ -31,7 +26,8 @@ const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
   const dispatch = useDispatch<AppDispatch>();
   const { category,filterd } = useSelector((state: RootState) => state.category);
   const [filterText, setFilterText] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const theme:any= useTheme();
+  const isDark = theme.theme === "dark";
 
   useEffect(() => {
     dispatch({ type: "category/fetchCategory" });
@@ -44,53 +40,63 @@ const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
       ),
     [category, filterText]
   );
-  // Memoize checked categories for onChange
-  const checkedCategories = useMemo(
-    () => category.filter((cat) => selectedCategories.includes(cat.name)),
-    [category, selectedCategories]
-  );
-
-  // Call onChange when checked categories change
-  useEffect(() => {
-
-    onChange(checkedCategories);
-  }, [checkedCategories, onChange]);
   const handleToggle = (name: string) => {
     const data=category.filter((cat)=>cat.name===name)
-    const newSelected = selectedCategories.includes(name)
-      ? selectedCategories.filter((item) => item !== name)
-      : [...selectedCategories, name];
-    setSelectedCategories(newSelected);
-    dispatch({ type: "category/filter", payload:data});
+    dispatch({ type:"category/filter", payload:data[0]});
+
   };
+  const  srr= "https://ozcuwnfchwhgnwdincfu.supabase.co/storage/v1/object/public/youcan//youcan.jpg"
 
   return (
     <Select
       fullWidth
       multiple
-      value={selectedCategories}
+      value={filterd.map((t)=>t.name)}
       input={<OutlinedInput />}
       renderValue={(selected) => (selected as string[]).join(", ")}
+      sx={{
+        color: isDark ? "white" : "black",
+        border: isDark ? "1px solid white" : "1px solid gray",
+        bgcolor: isDark ? "black" : "white",
+      }}
       MenuProps={{
-        PaperProps: { style: { maxHeight: 300 } },
+        PaperProps: {
+          sx: {
+            bgcolor: isDark ? "black" : "white",
+            color: isDark ? "white" : "black",
+          },
+          style: { maxHeight: 300 },
+        },
         MenuListProps: { disablePadding: true },
       }}
     >
       <MenuWrapper>
         <TextField
           fullWidth
+          value={filterText}
           placeholder="Filter by name..."
           onChange={(e) => setFilterText(e.target.value)}
           size="small"
+          sx={{
+            input: {
+              color: isDark ? "white" : "black",
+              border: isDark ? "1px solid white" : "1px solid gray",
+            },
+            fieldset: {
+              borderColor: isDark ? "white" : "gray",
+            },
+          }}
         />
       </MenuWrapper>
 
       {filtered.map((cat, index) => (
         <MenuItem key={index} value={cat.name} onClick={() => handleToggle(cat.name)}>
-          <Checkbox checked={selectedCategories.includes(cat.name)} />
-          <ListItemAvatar>
-            <Avatar src={cat.image} sx={{ width: 28, height: 28, mr: 1 }} />
-          </ListItemAvatar>
+          <Checkbox checked={filterd.includes(cat)} />
+           {cat.image ? (
+                    <Image src={srr} alt={cat.name} width={50} height={50} className="object-cover rounded-full mr-3" />
+                  ) : (
+                    <div className="w-[50px] h-[50px] bg-gray-200" /> // Fallback for missing image
+                  )}
           <ListItemText
             primary={`${cat.name}`}
           />
