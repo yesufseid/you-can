@@ -35,14 +35,13 @@ export default function CategoryItem({
   const handleDelete=async()=>{
     dispatch({ type:"category/filter", payload:{id:id}});
   }
-const  srr= "https://ozcuwnfchwhgnwdincfu.supabase.co/storage/v1/object/public/youcan//youcan.jpg"
   return (
     <div className="flex dark:bg-black dark:text-white relative items-center justify-between p-2 bg-white rounded-lg shadow-sm gap-2 border-2 border-slate-500">
     < ClearIcon onClick={handleDelete} fontSize="small" className="absolute top-1 right-1 text-red-500  cursor-pointer"   />
       <div className="flex items-center gap-3">
 
         {image ? (
-          <Image src={srr} alt={name} width={100} height={100} className="object-cover rounded-full" />
+          <Image src={image} alt={name} width={100} height={100} className="object-fill rounded-full" />
         ) : (
           <div className="w-[200px] h-[200px] bg-gray-200" /> // Fallback for missing image
         )}

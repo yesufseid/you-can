@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { Box, Typography } from "@mui/material";
+import React from "react";
 import CategoryDropdown from "./CategoryDropdown";
 import CategoryItem from "./Card";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "../Redux/store";
+import { useSelector } from "react-redux";
+import { RootState} from "../Redux/store";
 
 interface Category {
   name: string;
@@ -14,19 +13,12 @@ interface Category {
   id: string;
 }
 
-const CategoryManager: React.FC<{
-  onCategorySelect: (category: Category) => void;
-}> = ({ onCategorySelect }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { category,filterd }=useSelector((state: RootState) => state.category); // Fixed typo
-  const [selectedCategoryNames, setSelectedCategoryNames] = useState<string[]>([]);
-  
-
-
+const CategoryManager= () => {
+  const { filterd }=useSelector((state: RootState) => state.category); // Fixed typo
   return (
     <div>
       <div className="lg:mx-40 mb-2">
-      <CategoryDropdown onChange={setSelectedCategoryNames} />
+      <CategoryDropdown />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 lg:mx-40 gap-5">
         {filterd.map((cat: Category) => (

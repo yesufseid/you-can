@@ -28,7 +28,7 @@ type activityProps={
   created_at:string
 }
 
-const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
+const CategoryDropdown = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { category,filterd } = useSelector((state: RootState) => state.category);
   const [filterText, setFilterText] = useState("");
@@ -40,24 +40,25 @@ const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
   useEffect(() => {
     dispatch({ type: "category/fetchCategory" });
   }, [dispatch]);
-
-  const HandleFilterText=(e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)=>{
-    const text=e.target.value
-    setFilterText(text)
-    if(filterText==="") setFilteredText(category)    
-
-    const data:any=category.filter((cat) =>
-          cat.name.toLowerCase().includes(text.toLowerCase())
-        )
-    setFilteredText(data)    
-  }
+  const HandleFilterText = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    setFilterText(text);
+    if (false) {
+      setFilteredText(category);
+    } else {
+      const data: any = category.filter((cat) =>
+        cat.name.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredText(data);
+    }
+  };
+  
 
   const handleToggle = (name: string) => {
     const data=category.filter((cat)=>cat.name===name)
     dispatch({ type:"category/filter", payload:data[0]});
 
   };
-  const  srr= "https://ozcuwnfchwhgnwdincfu.supabase.co/storage/v1/object/public/youcan//youcan.jpg"
 
   return (
     <Select
@@ -105,16 +106,12 @@ const CategoryDropdown = ({ onChange }: { onChange:React.Dispatch<any>}) => {
         <MenuItem key={index} value={cat.name} onClick={() => handleToggle(cat.name)}>
           <Checkbox checked={filterd.includes(cat)} />
            {cat.image ? (
-                    <Image src={srr} alt={cat.name} width={50} height={50} className="object-cover rounded-full mr-3" />
+                    <Image src={cat.image} alt={cat.name} width={50} height={50} className="object-cover rounded-full mr-3" />
                   ) : (
                     <div className="w-[50px] h-[50px] bg-gray-200" /> // Fallback for missing image
                   )}
-          <ListItemText
-            primary={`${cat.name}`}
-          />
-          <ListItemText
-            primary={`${cat.mass}g`}
-          />
+          <ListItemText primary={cat.name} />
+         <ListItemText primary={`${cat.mass}g`} />
         </MenuItem>
       ))}
 

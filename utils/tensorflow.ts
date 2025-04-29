@@ -13,24 +13,34 @@ export async function loadModel() {
   }
 }
 
-export async function detectObjects(image: HTMLImageElement, type: string): Promise<number> {
+export async function detectObjects(image: HTMLImageElement): Promise<number> {
   if (!model) await loadModel();
 
   const predictions = await model!.detect(image);
 
-  // Filter by class label based on type
-  const classLabels: Record<string, string[]> = {
-    bottle: ['bottle'],
-    bag: ['handbag', 'backpack'],
-    cup: ['cup'],
-    container: ['bowl', 'box'],
-  };
-
-  const matchLabels = classLabels[type] ?? [];
-
+  // Only keep bottles
   const matchedObjects = predictions.filter((pred) =>
-    matchLabels.includes(pred.class.toLowerCase())
+    pred.class.toLowerCase() === 'bottle'
   );
 
-  return matchedObjects.length;
+  let totalWeight = 0;
+
+  matchedObjects.forEach((pred) => {
+    const [x, y, width, height] = pred.bbox;
+    const area = width * height;
+
+    // Classify by area size
+    let weight = 0;
+    if (area < 5000) {
+      weight = 15; // Small bottle (~0.5L) → 15g
+    } else if (area < 15000) {
+      weight = 25; // Medium bottle (~1L) → 25g
+    } else {
+      weight = 40; // Large bottle (~2L) → 40g
+    }
+
+    totalWeight += weight;
+  });
+
+  return totalWeight; // Total estimated weight in grams
 }

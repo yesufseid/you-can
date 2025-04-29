@@ -68,7 +68,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, setOpen }) 
     }
   
     const { data: publicUrlData } = supabase.storage
-      .from('you')
+      .from('youcan')
       .getPublicUrl(filePath);
   
     return publicUrlData.publicUrl;

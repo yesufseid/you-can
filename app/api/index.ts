@@ -10,7 +10,6 @@ const getCategory=async()=>{
       console.error("Failed to get category:", error.message);
       return error;
     }
-    console.log(data);
     return data;
 }
 

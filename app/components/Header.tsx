@@ -59,7 +59,7 @@ import {
   {calculateTotal()}g
 </Typography>
                <ThemeSwitcher />
-               <LinkButton   href={"#"} children={"useAI"} />
+               <LinkButton   href={"/ai"} children={"useAI"} />
            </div>
        </div>
      
