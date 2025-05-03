@@ -1,17 +1,18 @@
 "use client"
 import {
-    AppBar,
     Typography,
   } from "@mui/material";
  
+import { useRouter } from 'next/navigation'
  import LinkButton from "./LinkButton";
  import { ThemeSwitcher } from "@/components/theme-switcher";
  import {useSelector } from "react-redux";
- import { RootState, AppDispatch } from "../Redux/store";
+ import { RootState} from "../Redux/store";
  import youcan from "../public/Image/youcan-white.svg"
  import Image from "next/image";
  import { useTheme } from "next-themes";
   export default function Headre() {
+    const router = useRouter()
      const theme:any= useTheme();
     const isDark = theme.theme === "dark";
     const {count,filterd} = useSelector((state: RootState) => state.category);
@@ -27,20 +28,22 @@ import {
     
     return (
     
-       <div className="grid grid-cols-12 gap-5 h-20 lg:mx-40">
+       <div className="grid grid-cols-12 gap-5 h-20 lg:mx-40  bg-white dark:bg-black sticky top-0 z-50">
            <div className="lg:col-span-5 col-span-4  flex justify-center lg:justify-center items-center ">
-           <div className="text-red-500">
+           <div className="text-red-500 cursor-pointer">
               {isDark?<Image 
                  src={youcan} 
                  alt="Youcan Logo" 
                   width={150} // adjust size if needed
                    height={50} 
+                   onClick={() => router.push('/')}
                            />:<Image 
                            src={youcan} 
                            alt="Youcan Logo" 
                             width={150} // adjust size if needed
                              height={50} 
                              style={{filter:`invert(1)`, width: 150, height: 50 }}
+                             onClick={() => router.push('/')}
                                      />}  
                     </div>
            </div>

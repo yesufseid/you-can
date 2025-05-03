@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React,{useEffect} from "react";
 import CategoryDropdown from "./CategoryDropdown";
 import CategoryItem from "./Card";
-import { useSelector } from "react-redux";
-import { RootState} from "../Redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "../Redux/store";
+
 
 interface Category {
   name: string;
@@ -15,6 +16,7 @@ interface Category {
 
 const CategoryManager= () => {
   const { filterd }=useSelector((state: RootState) => state.category); // Fixed typo
+  
   return (
     <div>
       <div className="lg:mx-40 mb-2">

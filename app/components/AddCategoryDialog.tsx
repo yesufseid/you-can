@@ -36,6 +36,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, setOpen }) 
     mass: 0,
     image:'',
   });
+  const [fileLoading,setFileLoading]=useState(false)
   const [file, setFile] = useState<File | null>(null);
   const theme: any = useTheme();
   const isDark = theme.theme === 'dark';
@@ -56,6 +57,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, setOpen }) 
     reader.readAsDataURL(selectedFile);
   };
   const uploadImage = async (file: File) => {
+    setFileLoading(true)
     const supabase = await createClient();
     const filePath = `youcan-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage
@@ -76,6 +78,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, setOpen }) 
   const handleCreate = async () => {
     if (!file) return;
      const publicUrl=await uploadImage(file)
+     setFileLoading(false)
     if (publicUrl) {
       const categoryToSave = {
         ...newCategory,
@@ -165,7 +168,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, setOpen }) 
           color="primary"
           disabled={!newCategory.name || !newCategory.mass || !file}
         >
-         {loading?"loading...":"Create"}
+          {fileLoading?"ImageUploading...":loading?"loading...":"Create"}
         </Button>
       </DialogActions>
     </Dialog>

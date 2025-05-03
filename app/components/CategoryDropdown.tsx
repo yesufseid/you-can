@@ -9,62 +9,57 @@ import {
   TextField,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import React, { useEffect, useState,useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../Redux/store";
 import { useTheme } from "next-themes";
 import Image from "next/image";
+import DropDown from "./DropDown";
 
-
+type activityProps = {
+  id: string;
+  name: string;
+  mass: number;
+  image: string;
+  created_at: string;
+};
 
 const MenuWrapper = styled("div")(({ theme }) => ({
   padding: theme.spacing(1),
 }));
-type activityProps={
-  id:string
-  name:string,
-  mass:number,
-  image:string ,
-  created_at:string
-}
 
 const CategoryDropdown = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { category,filterd } = useSelector((state: RootState) => state.category);
+  const { category, filterd,loading,error } = useSelector((state: RootState) => state.category);
   const [filterText, setFilterText] = useState("");
-  const [filtered, setFilteredText] = useState<any[]>([]);
+  const [filtered, setFiltered] = useState<activityProps[]>([]);
+  const [open, setOpen] = useState(false);
 
-  const theme:any= useTheme();
+  const theme: any = useTheme();
   const isDark = theme.theme === "dark";
 
-  useEffect(() => {
-    dispatch({ type: "category/fetchCategory" });
-  }, [dispatch]);
-  const HandleFilterText = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFilterText = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setFilterText(text);
-    if (false) {
-      setFilteredText(category);
-    } else {
-      const data: any = category.filter((cat) =>
-        cat.name.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredText(data);
-    }
+    const data = category.filter((cat) =>
+      cat.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setFiltered(data);
   };
-  
 
-  const handleToggle = (name: string) => {
-    const data=category.filter((cat)=>cat.name===name)
-    dispatch({ type:"category/filter", payload:data[0]});
-
-  };
+ 
 
   return (
     <Select
       fullWidth
       multiple
-      value={filterd.map((t)=>t.name)}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => {
+        setOpen(false);
+        setFilterText(""); // Reset search when closed
+        setFiltered(category);
+      }}
+      value={filterd.map((t) => t.name)}
       input={<OutlinedInput />}
       renderValue={(selected) => (selected as string[]).join(", ")}
       sx={{
@@ -78,44 +73,40 @@ const CategoryDropdown = () => {
             bgcolor: isDark ? "black" : "white",
             color: isDark ? "white" : "black",
           },
-          style: { maxHeight: 300 },
+          style: { maxHeight: 350 },
         },
-        MenuListProps: { disablePadding: true },
+        MenuListProps: {
+          disablePadding: true,
+        },
       }}
     >
       <MenuWrapper>
-        <TextField
-          fullWidth
-          value={filterText}
-          placeholder="Filter by name..."
-          onChange={(e) =>HandleFilterText(e)}
-          size="small"
-          sx={{
-            input: {
-              color: isDark ? "white" : "black",
-              border: isDark ? "1px solid white" : "1px solid gray",
-            },
-            fieldset: {
-              borderColor: isDark ? "white" : "gray",
-            },
-          }}
-        />
+      <TextField
+  fullWidth
+  value={filterText}
+  placeholder="Filter by name..."
+  onChange={handleFilterText}
+  onClick={(e) => e.stopPropagation()}
+  onKeyDown={(e) => e.stopPropagation()}
+  size="small"
+  sx={{
+    input: {
+      color: isDark ? "white" : "black",
+    },
+    fieldset: {
+      borderColor: isDark ? "white" : "gray",
+    },
+  }}
+/>
       </MenuWrapper>
 
-      {filtered.map((cat:activityProps,index) => (
-        <MenuItem key={index} value={cat.name} onClick={() => handleToggle(cat.name)}>
-          <Checkbox checked={filterd.includes(cat)} />
-           {cat.image ? (
-                    <Image src={cat.image} alt={cat.name} width={50} height={50} className="object-cover rounded-full mr-3" />
-                  ) : (
-                    <div className="w-[50px] h-[50px] bg-gray-200" /> // Fallback for missing image
-                  )}
-          <ListItemText primary={cat.name} />
-         <ListItemText primary={`${cat.mass}g`} />
+     <DropDown filtered={filtered} setFiltered={setFiltered} />
+      {loading&&<p>Loading ...</p>}
+      {filtered.length === 0 && (
+        <MenuItem disabled>
+          No categories found
         </MenuItem>
-      ))}
-
-      {filtered.length === 0 && <MenuItem disabled>No categories found</MenuItem>}
+      )}
     </Select>
   );
 };
