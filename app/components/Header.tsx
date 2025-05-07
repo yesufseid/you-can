@@ -28,7 +28,7 @@ import { useRouter } from 'next/navigation'
     
     return (
     
-       <div className="grid grid-cols-12 gap-5 h-20 lg:mx-40  bg-white dark:bg-black sticky top-0 z-50">
+       <div className="grid grid-cols-12 gap-5 h-20 lg:mx-40  bg-white dark:bg-neutral-950 sticky top-0 z-50">
            <div className="lg:col-span-5 col-span-4  flex justify-center lg:justify-center items-center ">
            <div className="text-red-500 cursor-pointer">
               {isDark?<Image 

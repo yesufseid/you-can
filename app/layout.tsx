@@ -42,7 +42,7 @@ export default function RootLayout({
                   <Headre />
                 {children}
                 <AddCat />
-          </main>
+              </main>
           </Providers>
         </ThemeProvider>
       </body>

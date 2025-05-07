@@ -1,16 +1,15 @@
 "use client"
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../Redux/store";
-import { useEffect,useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
+import { useTheme } from "next-themes";
+
 
 import {
   Checkbox,
   ListItemText,
   MenuItem,
-  OutlinedInput,
-  Select,
-  TextField,
 } from "@mui/material";
 
 type activityProps = {
@@ -23,6 +22,8 @@ type activityProps = {
 export default function DropDown({filtered,setFiltered}:{filtered:activityProps[],setFiltered:React.Dispatch<React.SetStateAction<activityProps[]>>}) {
      const dispatch = useDispatch<AppDispatch>();
       const { filterd,category }=useSelector((state: RootState) => state.category); // Fixed typo
+       const theme: any = useTheme();
+        const isDark = theme.theme === "dark";
         useEffect(() => {
           dispatch({ type: "category/fetchCategory" });
         }, [dispatch]);
@@ -41,7 +42,14 @@ export default function DropDown({filtered,setFiltered}:{filtered:activityProps[
     <>
       {filtered.length>0&&filtered.map((cat) => (
             <MenuItem key={cat.id} value={cat.name} onClick={() => handleToggle(cat.name)}>
-              <Checkbox checked={filterd.some((f) => f.name === cat.name)} />
+              <Checkbox checked={filterd.some((f) => f.name === cat.name)}
+                  sx={{
+                    color: isDark ? "white" : "black", // default icon color
+                    "&.Mui-checked": {
+                      color: isDark ? "white" : "primary", // checked color
+                    },
+                  }}
+              />
               {cat.image ? (
                 <Image
                   src={cat.image}

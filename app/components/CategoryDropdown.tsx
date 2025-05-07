@@ -1,20 +1,18 @@
 "use client";
 
 import {
-  Checkbox,
-  ListItemText,
   MenuItem,
   OutlinedInput,
   Select,
   TextField,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "../Redux/store";
+import React, {  useState } from "react";
+import {  useSelector } from "react-redux";
+import { RootState,  } from "../Redux/store";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import DropDown from "./DropDown";
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 type activityProps = {
   id: string;
@@ -62,6 +60,9 @@ const CategoryDropdown = () => {
       value={filterd.map((t) => t.name)}
       input={<OutlinedInput />}
       renderValue={(selected) => (selected as string[]).join(", ")}
+      IconComponent={(props) => (
+        <ArrowDropDownIcon {...props} sx={{ bgcolor:'white' }} />
+      )}
       sx={{
         color: isDark ? "white" : "black",
         border: isDark ? "1px solid white" : "1px solid gray",
